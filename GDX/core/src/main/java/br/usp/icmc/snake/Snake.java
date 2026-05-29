@@ -10,36 +10,57 @@ public class Snake {
     private boolean isAlive;
     private int score;
 
-    public Snake(GridPosition startPosition, br.usp.icmc.snake.Direction startDirection) {
+    // --- Sistema de Power-ups ---
+    private int invulnerableTicks = 0;
+    private int multiplierTicks = 0;
+
+    public Snake(GridPosition startPosition, Direction startDirection) {
         this.body = new LinkedList<>();
-        this.body.addFirst(startPosition);
         this.currentDirection = startDirection;
         this.isAlive = true;
         this.score = 0;
+
+        this.body.addFirst(startPosition);
+
+        for (int i = 1; i <= 2; i++) {
+            int tailX = startPosition.x();
+            int tailY = startPosition.y();
+
+            switch (startDirection) {
+                case UP -> tailY -= i;
+                case DOWN -> tailY += i;
+                case LEFT -> tailX += i;
+                case RIGHT -> tailX -= i;
+            }
+            this.body.addLast(new GridPosition(tailX, tailY));
+        }
     }
 
-    public Iterable<GridPosition> getBody() {
-        return List.copyOf(body);
-    }
+    public List<GridPosition> getBody() { return List.copyOf(body); }
+    public GridPosition getHead() { return body.peekFirst(); }
 
-    public GridPosition getHead() {
-        return body.peekFirst();
-    }
-
-    public void setDirection(br.usp.icmc.snake.Direction newDirection) {
+    public void setDirection(Direction newDirection) {
         if (!this.currentDirection.isOpposite(newDirection)) {
             this.currentDirection = newDirection;
         }
     }
 
-    public GridPosition getNextHeadPosition() {
+    public GridPosition getNextHeadPosition(int worldWidth, int worldHeight) {
         GridPosition head = getHead();
-        return switch (currentDirection) {
-            case UP -> new GridPosition(head.x(), head.y() + 1);
-            case DOWN -> new GridPosition(head.x(), head.y() - 1);
-            case LEFT -> new GridPosition(head.x() - 1, head.y());
-            case RIGHT -> new GridPosition(head.x() + 1, head.y());
-        };
+        int nextX = head.x();
+        int nextY = head.y();
+
+        switch (currentDirection) {
+            case UP -> nextY += 1;
+            case DOWN -> nextY -= 1;
+            case LEFT -> nextX -= 1;
+            case RIGHT -> nextX += 1;
+        }
+
+        nextX = (nextX + worldWidth) % worldWidth;
+        nextY = (nextY + worldHeight) % worldHeight;
+
+        return new GridPosition(nextX, nextY);
     }
 
     public void move(GridPosition newHead) {
@@ -49,13 +70,23 @@ public class Snake {
 
     public void grow(GridPosition newHead) {
         body.addFirst(newHead);
-        score++;
+        // Se o multiplicador estiver ativo, ganha 3 pontos, senão 1.
+        score += (multiplierTicks > 0) ? 3 : 1;
     }
 
-    public boolean checkCollision(GridPosition pos) {
-        return body.contains(pos);
+    // --- Gerenciamento de Buffs ---
+    public void updateBuffs() {
+        if (invulnerableTicks > 0) invulnerableTicks--;
+        if (multiplierTicks > 0) multiplierTicks--;
     }
 
+    public void activateInvulnerability(int durationInTicks) { this.invulnerableTicks = durationInTicks; }
+    public void activateMultiplier(int durationInTicks) { this.multiplierTicks = durationInTicks; }
+
+    public boolean isInvulnerable() { return invulnerableTicks > 0; }
+    public boolean hasMultiplier() { return multiplierTicks > 0; }
+
+    public boolean checkCollision(GridPosition pos) { return body.contains(pos); }
     public int getScore() { return score; }
     public void die() { this.isAlive = false; }
     public boolean isAlive() { return isAlive; }

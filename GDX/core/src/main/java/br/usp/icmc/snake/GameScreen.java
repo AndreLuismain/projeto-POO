@@ -3,51 +3,113 @@ package br.usp.icmc.snake;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class GameScreen extends ScreenAdapter {
     private final SnakeGame game;
     private final GameWorld world;
 
-    private float timer = 0;
-    private final float tickTime = 0.15f; // Velocidade do jogo (0.15 segundos por movimento)
-    private final int cellSize = 20; // Tamanho de cada "quadrado" na tela
+    // Texturas
+    private Texture chaoClaro;
+    private Texture chaoEscuro;
+    private Texture comidaTexture;
+    private Texture cabeca1Texture;
+    private Texture cabeca2Texture;
+    private Texture corpo1Texture;
+    private Texture corpo2Texture;
+    private Texture obstaculoTexture;
+    private Texture escudoTexture; // NOVO: Power Up 1
+    private Texture estrelaTexture; // NOVO: Power Up 2
 
-    public GameScreen(SnakeGame game) {
+    // UI e Sons
+    private BitmapFont fontScore;
+    private Sound eatSound;
+    private Sound dieSound;
+    private Sound powerUpSound; // NOVO
+
+    private OrthographicCamera camera;
+    private Viewport viewport;
+
+    private float timer = 0;
+    private final int cellSize;
+
+    public GameScreen(SnakeGame game, int gridWidth, int gridHeight, float startSpeed) {
         this.game = game;
-        // Cria um mundo de 40x30 quadrados
-        this.world = new GameWorld(40, 30);
+        this.world = new GameWorld(gridWidth, gridHeight, startSpeed);
+        this.cellSize = 800 / gridWidth;
+
+        this.chaoClaro = new Texture("chaoClaro.png");
+        this.chaoEscuro = new Texture("chaoEscuro.png");
+        this.comidaTexture = new Texture("comida1.png");
+        this.cabeca1Texture = new Texture("cabeca1.png");
+        this.cabeca2Texture = new Texture("cabeca2.png");
+        this.corpo1Texture = new Texture("corpo1.png");
+        this.corpo2Texture = new Texture("corpo2.png");
+        this.obstaculoTexture = new Texture("obstaculo.png");
+
+        // Texturas dos Poderes
+        this.escudoTexture = new Texture("escudo.png");
+        this.estrelaTexture = new Texture("estrela.png");
+
+        this.fontScore = new BitmapFont();
+        this.fontScore.getData().setScale(1.2f);
+
+        this.eatSound = Gdx.audio.newSound(Gdx.files.internal("eat.wav"));
+        this.dieSound = Gdx.audio.newSound(Gdx.files.internal("die.wav"));
+        // Se quiser usar o mesmo som da comida para o poder provisoriamente, tudo bem:
+        this.powerUpSound = Gdx.audio.newSound(Gdx.files.internal("eat.wav"));
+
+        this.camera = new OrthographicCamera();
+        this.viewport = new FitViewport(800, 600, camera);
     }
 
     @Override
     public void render(float delta) {
         handleInput();
 
-        // Só atualiza a lógica do jogo quando o timer atinge o tickTime
         timer += delta;
-        if (timer >= tickTime) {
+        if (timer >= world.getCurrentTickTime()) {
             world.update();
             timer = 0;
+
+            if (world.popEatSound()) eatSound.play(0.5f);
+            if (world.popDieSound()) dieSound.play(0.8f);
+            if (world.popPowerUpSound()) powerUpSound.play(1.0f); // Toca mais alto para destacar
         }
+
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
 
         draw();
-        // Faz o roteamento passando a mensagem de vitória do Model para a nova View
-        if (world.isGameOver()) {
-            game.setScreen(new GameOverScreen(game, world.getWinnerMessage()));
-        }
 
+        if (world.isGameOver()) {
+            boolean p1Alive = world.getPlayer1().isAlive();
+            Snake winner = p1Alive ? world.getPlayer1() : world.getPlayer2();
+            int winnerId = p1Alive ? 1 : 2;
+
+            game.setScreen(new GameOverScreen(
+                game, world.getWinnerMessage(), winner.getScore(), winner.getBody().size(), winnerId
+            ));
+        }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
     }
 
     private void handleInput() {
-        // Player 1 (Setas)
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) world.getPlayer1().setDirection(Direction.UP);
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) world.getPlayer1().setDirection(Direction.DOWN);
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) world.getPlayer1().setDirection(Direction.LEFT);
         if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) world.getPlayer1().setDirection(Direction.RIGHT);
 
-        // Player 2 (WASD)
         if (Gdx.input.isKeyJustPressed(Input.Keys.W)) world.getPlayer2().setDirection(Direction.UP);
         if (Gdx.input.isKeyJustPressed(Input.Keys.S)) world.getPlayer2().setDirection(Direction.DOWN);
         if (Gdx.input.isKeyJustPressed(Input.Keys.A)) world.getPlayer2().setDirection(Direction.LEFT);
@@ -55,55 +117,105 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void draw() {
-        // 1. Fundo grafite elegante (nada de preto absoluto)
         Gdx.gl.glClearColor(0.12f, 0.12f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        game.shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        game.batch.begin();
 
-        // 2. Desenhando um Grid de fundo (Linhas finas)
-        game.shapeRenderer.setColor(0.2f, 0.2f, 0.25f, 1f);
-        for (int x = 0; x < Gdx.graphics.getWidth(); x += cellSize) {
-            game.shapeRenderer.rectLine(x, 0, x, Gdx.graphics.getHeight(), 1);
+        for (int x = 0; x < 800; x += cellSize) {
+            for (int y = 0; y < 600; y += cellSize) {
+                int coluna = x / cellSize;
+                int linha = y / cellSize;
+                if ((coluna + linha) % 2 == 0) {
+                    game.batch.draw(chaoClaro, x, y, cellSize, cellSize);
+                } else {
+                    game.batch.draw(chaoEscuro, x, y, cellSize, cellSize);
+                }
+            }
         }
-        for (int y = 0; y < Gdx.graphics.getHeight(); y += cellSize) {
-            game.shapeRenderer.rectLine(0, y, Gdx.graphics.getWidth(), y, 1);
+
+        // Desenha Obstáculos
+        for (GridPosition obs : world.getObstacles()) {
+            game.batch.draw(obstaculoTexture, obs.x() * cellSize, obs.y() * cellSize, cellSize, cellSize);
         }
 
-        // 3. Desenhando a Comida como um Círculo (centralizado no quadrado)
-        game.shapeRenderer.setColor(Color.CORAL);
-        game.shapeRenderer.circle(
-            world.getFood().x() * cellSize + (cellSize / 2f),
-            world.getFood().y() * cellSize + (cellSize / 2f),
-            cellSize / 2.5f
-        );
+        // Desenha Power Up (Se existir no mapa)
+        if (world.getPowerUpPos() != null) {
+            Texture pTexture = (world.getPowerUpType() == 1) ? escudoTexture : estrelaTexture;
+            game.batch.draw(pTexture, world.getPowerUpPos().x() * cellSize, world.getPowerUpPos().y() * cellSize, cellSize, cellSize);
+        }
 
-        // 4. Desenhando as Cobras com nosso novo método estético
-        drawSnake(world.getPlayer1(), Color.LIME, Color.FOREST); // Player 1 (Verde claro/escuro)
-        drawSnake(world.getPlayer2(), Color.CYAN, Color.TEAL);   // Player 2 (Azul claro/escuro)
+        // Comida
+        game.batch.draw(comidaTexture, world.getFood().x() * cellSize, world.getFood().y() * cellSize, cellSize, cellSize);
 
-        game.shapeRenderer.end();
+        // Cobras
+        drawSnake(world.getPlayer1(), cabeca1Texture, corpo1Texture);
+        drawSnake(world.getPlayer2(), cabeca2Texture, corpo2Texture);
+
+        // Indicadores Visuais no Placar se os Buffs estiverem ativos
+        String p2Buffs = world.getPlayer2().isInvulnerable() ? " [ESCUDO]" : (world.getPlayer2().hasMultiplier() ? " [x3]" : "");
+        String p1Buffs = world.getPlayer1().isInvulnerable() ? " [ESCUDO]" : (world.getPlayer1().hasMultiplier() ? " [x3]" : "");
+
+        fontScore.draw(game.batch, "P2 (Azul) Score: " + world.getPlayer2().getScore() + p2Buffs, 20, 580);
+        fontScore.draw(game.batch, "P1 (Verde) Score: " + world.getPlayer1().getScore() + p1Buffs, 600, 580);
+
+        game.batch.end();
     }
 
-    // Metodo auxiliar para estilizar a cobra
-    private void drawSnake(Snake snake, Color headColor, Color bodyColor) {
-        boolean isHead = true;
+    private void drawSnake(Snake snake, Texture headTex, Texture bodyTex) {
+        int index = 0;
+        int size = snake.getBody().size();
+        float bodyShrink = 4f;
+        float tailShrink = 10f;
+
+        // Efeito visual fantasma caso a cobra esteja invulnerável
+        float alphaEffect = snake.isInvulnerable() ? 0.3f : 1.0f;
+
         for (GridPosition pos : snake.getBody()) {
-            if (isHead) {
-                game.shapeRenderer.setColor(headColor);
-                isHead = false;
+            float posX = pos.x() * cellSize;
+            float posY = pos.y() * cellSize;
+
+            if (index == 0) {
+                if (bodyTex != null) {
+                    game.batch.setColor(1f, 1f, 1f, 0.6f * alphaEffect);
+                    game.batch.draw(bodyTex, posX + (bodyShrink / 2), posY + (bodyShrink / 2), cellSize - bodyShrink, cellSize - bodyShrink);
+                }
+                game.batch.setColor(1f, 1f, 1f, alphaEffect);
+                game.batch.draw(headTex, posX, posY, cellSize, cellSize);
+
+            } else if (index == size - 1) {
+                if (bodyTex != null) {
+                    game.batch.setColor(1f, 1f, 1f, 0.6f * alphaEffect);
+                    game.batch.draw(bodyTex, posX + (tailShrink / 2), posY + (tailShrink / 2), cellSize - tailShrink, cellSize - tailShrink);
+                }
             } else {
-                game.shapeRenderer.setColor(bodyColor);
+                if (bodyTex != null) {
+                    game.batch.setColor(1f, 1f, 1f, 0.6f * alphaEffect);
+                    game.batch.draw(bodyTex, posX + (bodyShrink / 2), posY + (bodyShrink / 2), cellSize - bodyShrink, cellSize - bodyShrink);
+                }
             }
 
-            // O truque da textura: desenhamos um retângulo 2 pixels menor que a célula.
-            // Isso cria a ilusão de "escamas" em vez de um tubo sólido.
-            game.shapeRenderer.rect(
-                pos.x() * cellSize + 1,
-                pos.y() * cellSize + 1,
-                cellSize - 2,
-                cellSize - 2
-            );
+            game.batch.setColor(1f, 1f, 1f, 1f); // Reseta a cor no fim do loop daquela parte
+            index++;
         }
+    }
+
+    @Override
+    public void dispose() {
+        chaoClaro.dispose();
+        chaoEscuro.dispose();
+        comidaTexture.dispose();
+        cabeca1Texture.dispose();
+        cabeca2Texture.dispose();
+        corpo1Texture.dispose();
+        corpo2Texture.dispose();
+        obstaculoTexture.dispose();
+        escudoTexture.dispose();
+        estrelaTexture.dispose();
+
+        fontScore.dispose();
+        eatSound.dispose();
+        dieSound.dispose();
+        powerUpSound.dispose();
     }
 }

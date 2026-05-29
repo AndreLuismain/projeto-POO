@@ -11,33 +11,25 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import java.util.List;
 
-public class GameOverScreen extends ScreenAdapter {
+public class HighScoreScreen extends ScreenAdapter {
     private final SnakeGame game;
     private OrthographicCamera camera;
     private Viewport viewport;
-
-    private String winnerMessage;
-    private int score;
-    private int size;
 
     private BitmapFont fontTitle;
     private BitmapFont fontNormal;
     private Texture backgroundTexture;
     private Texture overlayTexture;
+    private List<Integer> topScores;
 
+    // Cores padronizadas do projeto
     private final Color corCentro = Color.valueOf("#F5DEB3");
     private final Color corBorda = Color.valueOf("#1A110B");
 
-    public GameOverScreen(SnakeGame game, String winnerMessage, int score, int size, int winnerId) {
+    public HighScoreScreen(SnakeGame game) {
         this.game = game;
-        this.winnerMessage = winnerMessage;
-        this.score = score;
-        this.size = size;
-
-        // Salva a pontuação do vencedor no arquivo local (Top 5)
-        HighScoreManager.addScore(score);
-
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(800, 600, camera);
 
@@ -48,13 +40,13 @@ public class GameOverScreen extends ScreenAdapter {
         this.fontTitle.setUseIntegerPositions(false);
         this.fontNormal.setUseIntegerPositions(false);
 
-        this.fontTitle.getData().setScale(0.9f);
+        this.fontTitle.getData().setScale(0.8f);
         this.fontNormal.getData().setScale(0.5f);
 
         addLetterSpacing(this.fontTitle, 4);
         addLetterSpacing(this.fontNormal, 3);
 
-        // 2. Texturas de Fundo
+        // 2. Carrega as texturas do fundo
         this.backgroundTexture = new Texture("fundo_menu.png");
 
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -62,11 +54,14 @@ public class GameOverScreen extends ScreenAdapter {
         pixmap.fill();
         this.overlayTexture = new Texture(pixmap);
         pixmap.dispose();
+
+        // 3. Carrega os dados persistidos do Top 5
+        this.topScores = HighScoreManager.loadScores();
     }
 
     @Override
     public void render(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             game.setScreen(new MainMenuScreen(game));
         }
 
@@ -78,23 +73,29 @@ public class GameOverScreen extends ScreenAdapter {
 
         game.batch.begin();
 
-        // Fundo e Véu Transparente
+        // Fundo e Overlay
         game.batch.draw(backgroundTexture, 0, 0, 800, 600);
 
         game.batch.setColor(1f, 1f, 1f, 0.85f);
         game.batch.draw(overlayTexture, 0, 0, 800, 600);
         game.batch.setColor(Color.WHITE);
 
-        // Título e Resultado
-        drawOutlinedText(fontTitle, "FIM DE JOGO", 230, 500);
-        drawOutlinedText(fontNormal, winnerMessage, 230, 420);
+        // Título
+        drawOutlinedText(fontTitle, "TOP 5 HIGH SCORES", 180, 520);
 
-        // Estatísticas
-        drawOutlinedText(fontNormal, "PONTUACAO FINAL: " + score, 230, 320);
-        drawOutlinedText(fontNormal, "TAMANHO DA COBRA: " + size, 230, 270);
+        // Desenha a lista de pontuações dinamicamente
+        if (topScores.isEmpty()) {
+            drawOutlinedText(fontNormal, "Nenhuma partida registrada ainda.", 150, 350);
+        } else {
+            int yPos = 400;
+            for (int i = 0; i < topScores.size(); i++) {
+                drawOutlinedText(fontNormal, (i + 1) + " LUGAR: " + topScores.get(i) + " PONTOS", 250, yPos);
+                yPos -= 50;
+            }
+        }
 
-        // Instrução para voltar
-        drawOutlinedText(fontNormal, "> Pressione [ENTER] para Voltar", 180, 150);
+        // Botão de Voltar
+        drawOutlinedText(fontNormal, "> Pressione [ESC] para Voltar", 220, 80);
 
         game.batch.end();
     }
