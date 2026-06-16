@@ -5,6 +5,3 @@ Thumbs.db
 # VS Code (mantém settings.json compartilhado, ignora o resto)
 .vscode/*
 !.vscode/settings.json
-
-# Executável empacotado (binário gerado, não deve ir pro repositório)
-/Executavel/
