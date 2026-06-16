@@ -29,7 +29,7 @@ public class GameOverScreen extends ScreenAdapter {
     private final Color corCentro = Color.valueOf("#F5DEB3");
     private final Color corBorda = Color.valueOf("#1A110B");
 
-    public GameOverScreen(SnakeGame game, String winnerMessage, int score, int size, int winnerId) {
+    public GameOverScreen(SnakeGame game, String winnerMessage, int score, int size) {
         this.game = game;
         this.winnerMessage = winnerMessage;
         this.score = score;

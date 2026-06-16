@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -26,6 +27,8 @@ public class GameScreen extends ScreenAdapter {
     private Texture obstaculoTexture;
     private Texture escudoTexture; // NOVO: Power Up 1
     private Texture estrelaTexture; // NOVO: Power Up 2
+    private TextureRegion escudoRegion;
+    private TextureRegion estrelaRegion;
 
     // UI e Sons
     private BitmapFont fontScore;
@@ -56,6 +59,10 @@ public class GameScreen extends ScreenAdapter {
         // Texturas dos Poderes
         this.escudoTexture = new Texture("escudo.png");
         this.estrelaTexture = new Texture("estrela.png");
+        // As imagens originais têm muita margem transparente ao redor do ícone;
+        // recorta só a área com conteúdo para o desenho ficar maior e bem proporcional.
+        this.escudoRegion = new TextureRegion(escudoTexture, 224, 45, 228, 277);
+        this.estrelaRegion = new TextureRegion(estrelaTexture, 201, 44, 275, 267);
 
         this.fontScore = new BitmapFont();
         this.fontScore.getData().setScale(1.2f);
@@ -91,10 +98,9 @@ public class GameScreen extends ScreenAdapter {
         if (world.isGameOver()) {
             boolean p1Alive = world.getPlayer1().isAlive();
             Snake winner = p1Alive ? world.getPlayer1() : world.getPlayer2();
-            int winnerId = p1Alive ? 1 : 2;
 
             game.setScreen(new GameOverScreen(
-                game, world.getWinnerMessage(), winner.getScore(), winner.getBody().size(), winnerId
+                game, world.getWinnerMessage(), winner.getScore(), winner.getBody().size()
             ));
         }
     }
@@ -141,8 +147,16 @@ public class GameScreen extends ScreenAdapter {
 
         // Desenha Power Up (Se existir no mapa)
         if (world.getPowerUpPos() != null) {
-            Texture pTexture = (world.getPowerUpType() == 1) ? escudoTexture : estrelaTexture;
-            game.batch.draw(pTexture, world.getPowerUpPos().x() * cellSize, world.getPowerUpPos().y() * cellSize, cellSize, cellSize);
+            TextureRegion pRegion = (world.getPowerUpType() == 1) ? escudoRegion : estrelaRegion;
+            // Desenha maior que uma célula comum para o power-up se destacar no mapa.
+            float sizeMultiplier = 1.3f;
+            float baseSize = cellSize * sizeMultiplier;
+            float aspect = (float) pRegion.getRegionWidth() / pRegion.getRegionHeight();
+            float drawWidth = aspect >= 1f ? baseSize : baseSize * aspect;
+            float drawHeight = aspect >= 1f ? baseSize / aspect : baseSize;
+            float cellCenterX = world.getPowerUpPos().x() * cellSize + cellSize / 2f;
+            float cellCenterY = world.getPowerUpPos().y() * cellSize + cellSize / 2f;
+            game.batch.draw(pRegion, cellCenterX - drawWidth / 2f, cellCenterY - drawHeight / 2f, drawWidth, drawHeight);
         }
 
         // Comida

@@ -1,0 +1,7 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code (mantém settings.json compartilhado, ignora o resto)
+.vscode/*
+!.vscode/settings.json

@@ -28,8 +28,8 @@ public class MainMenuScreen extends ScreenAdapter {
     private float selectedSpeed = 0.15f;
     private String speedLabel = "NORMAL";
 
-    private final Color corCreme = Color.valueOf("#F5DEB3");
-    private final Color corDourada = Color.valueOf("#1A110B");
+    private final Color corCreme = Color.valueOf("#FFD966");
+    private final Color corDourada = Color.valueOf("#000000");
 
     public MainMenuScreen(SnakeGame game) {
         this.game = game;
@@ -85,7 +85,7 @@ public class MainMenuScreen extends ScreenAdapter {
         // Em vez de espremer nos cantos, colocamos centralizado em duas linhas
         GlyphLayout layout = new GlyphLayout();
 
-        String txtEsquerda = "Desenvolvido por Andre Luis e Renan Soriano";
+        String txtEsquerda = "Desenvolvido por Andre Luis, Renan Soriano e André Luiz - ICMC USP";
         layout.setText(fontFooter, txtEsquerda);
         drawOutlinedText(fontFooter, txtEsquerda, (800 - layout.width) / 2, 50);
 
@@ -97,11 +97,14 @@ public class MainMenuScreen extends ScreenAdapter {
     }
 
     private void drawOutlinedText(BitmapFont font, String text, float x, float y) {
-        // MUDANÇA: O contorno agora é de apenas 1 pixel (x-1, x+1).
-        // Isso impede que a fonte pixelada vire uma "gosma" grossa e ilegível.
+        // Contorno em 8 direções para garantir leitura sobre o fundo de pedra.
         font.setColor(corDourada);
+        font.draw(game.batch, text, x - 1, y - 1);
         font.draw(game.batch, text, x - 1, y);
+        font.draw(game.batch, text, x - 1, y + 1);
+        font.draw(game.batch, text, x + 1, y - 1);
         font.draw(game.batch, text, x + 1, y);
+        font.draw(game.batch, text, x + 1, y + 1);
         font.draw(game.batch, text, x, y - 1);
         font.draw(game.batch, text, x, y + 1);
 
