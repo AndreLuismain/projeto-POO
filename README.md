@@ -32,7 +32,7 @@ Desenvolvido em **Java 21** e **LibGDX** como projeto prático para a disciplina
 * **Áudio:** Efeitos sonoros para coleta de itens, power-ups e mortes gerenciados por *flags* no ciclo de renderização.
 
 ## Autores
-* **André Luís** & **Renan Soriano** *Estudantes de Sistemas de Informação - ICMC/USP.*
+* **André Luís**, **Renan Soriano** & **André Luiz** *Estudantes de Sistemas de Informação - ICMC/USP.*
 
 ## Como rodar corretamente
 
