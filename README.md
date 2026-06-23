@@ -57,7 +57,7 @@ No Windows:
 
 ```bat
 cd GDX
-gradlew.bat lwjgl3:run
+.\gradlew.bat lwjgl3:run
 ```
 
 ### Build do projeto
