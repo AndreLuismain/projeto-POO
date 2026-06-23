@@ -125,12 +125,14 @@ public class GameScreen extends ScreenAdapter {
 
         // 4. Mudança de Estado: O Backend avisou que deu GameOver? 
         if (world.isGameOver()) {
-            boolean p1Alive = world.getPlayer1().isAlive();
-            Snake winner = p1Alive ? world.getPlayer1() : world.getPlayer2();
+            Snake p1 = world.getPlayer1();
+            Snake p2 = world.getPlayer2();
 
             // Polimorfismo: Delega o controle do fluxo para a tela de encerramento
             game.setScreen(new GameOverScreen(
-                game, world.getWinnerMessage(), winner.getScore(), winner.getBody().size()
+                game, world.getWinnerMessage(),
+                p1.getScore(), p1.getBody().size(),
+                p2.getScore(), p2.getBody().size()
             ));
         }
     }

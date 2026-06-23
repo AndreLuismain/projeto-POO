@@ -123,13 +123,17 @@ public class GameWorld {
             }
         }
 
-        // Se algum morreu, paralisa o mundo e delega a mensagem de vitória
+        // Se algum morreu, paralisa o mundo e delega a mensagem de vitória.
+        // O critério de vitória é a pontuação, não quem sobreviveu: quem morre
+        // primeiro ainda pode vencer se tiver feito mais pontos.
         if (!player1.isAlive() || !player2.isAlive()) {
             gameOver = true;
             soundDieRequested = true;
-            if (!player1.isAlive() && !player2.isAlive()) winnerMessage = "Empate! Colisao letal.";
-            else if (!player1.isAlive()) winnerMessage = "Player 2 Venceu!";
-            else winnerMessage = "Player 1 Venceu!";
+            int p1Score = player1.getScore();
+            int p2Score = player2.getScore();
+            if (p1Score == p2Score) winnerMessage = "Empate! Mesma pontuacao.";
+            else if (p1Score > p2Score) winnerMessage = "Player 1 Venceu!";
+            else winnerMessage = "Player 2 Venceu!";
             return;
         }
 
@@ -238,5 +242,8 @@ public class GameWorld {
     }
     public boolean popDieSound() {
         if (soundDieRequested) { soundDieRequested = false; return true; } return false;
+    }
+    public boolean popPowerUpSound() {
+        if (soundPowerUpRequested) { soundPowerUpRequested = false; return true; } return false;
     }
 }

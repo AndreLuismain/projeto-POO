@@ -73,7 +73,7 @@ public class MainMenuScreen extends ScreenAdapter {
         // --- INSTRUÇÕES E CONFIGURAÇÕES NO MEIO ---
         // Posições X e Y ajustadas para encaixar no meio do cenário
         drawOutlinedText(fontNormal, "<- MAPA -> : " + sizeLabel, 240, 350);
-        drawOutlinedText(fontNormal, "V VELOCIDADE A : " + speedLabel, 240, 310);
+        drawOutlinedText(fontNormal, "VELOCIDADE: " + speedLabel, 240, 310);
 
         // --- BOTÕES ---
         drawOutlinedText(fontNormal, "> Pressione [ENTER] para START", 220, 270);
@@ -85,7 +85,7 @@ public class MainMenuScreen extends ScreenAdapter {
         // Em vez de espremer nos cantos, colocamos centralizado em duas linhas
         GlyphLayout layout = new GlyphLayout();
 
-        String txtEsquerda = "Desenvolvido por Andre Luis, Renan Soriano e André Luiz - ICMC USP";
+        String txtEsquerda = "Desenvolvido por Andre Luis, Renan Soriano e Andre Luiz - ICMC USP";
         layout.setText(fontFooter, txtEsquerda);
         drawOutlinedText(fontFooter, txtEsquerda, (800 - layout.width) / 2, 50);
 

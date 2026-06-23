@@ -18,8 +18,10 @@ public class GameOverScreen extends ScreenAdapter {
     private Viewport viewport;
 
     private String winnerMessage;
-    private int score;
-    private int size;
+    private int p1Score;
+    private int p1Size;
+    private int p2Score;
+    private int p2Size;
 
     private BitmapFont fontTitle;
     private BitmapFont fontNormal;
@@ -29,14 +31,18 @@ public class GameOverScreen extends ScreenAdapter {
     private final Color corCentro = Color.valueOf("#F5DEB3");
     private final Color corBorda = Color.valueOf("#1A110B");
 
-    public GameOverScreen(SnakeGame game, String winnerMessage, int score, int size) {
+    public GameOverScreen(SnakeGame game, String winnerMessage, int p1Score, int p1Size, int p2Score, int p2Size) {
         this.game = game;
         this.winnerMessage = winnerMessage;
-        this.score = score;
-        this.size = size;
+        this.p1Score = p1Score;
+        this.p1Size = p1Size;
+        this.p2Score = p2Score;
+        this.p2Size = p2Size;
 
-        // Salva a pontuação do vencedor no arquivo local (Top 5)
-        HighScoreManager.addScore(score);
+        // Salva a melhor pontuação da partida no arquivo local (Top 5).
+        // Não usa a pontuação de quem "venceu" porque quem morre primeiro
+        // pode ter feito mais pontos que o sobrevivente.
+        HighScoreManager.addScore(Math.max(p1Score, p2Score));
 
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(800, 600, camera);
@@ -89,9 +95,9 @@ public class GameOverScreen extends ScreenAdapter {
         drawOutlinedText(fontTitle, "FIM DE JOGO", 230, 500);
         drawOutlinedText(fontNormal, winnerMessage, 230, 420);
 
-        // Estatísticas
-        drawOutlinedText(fontNormal, "PONTUACAO FINAL: " + score, 230, 320);
-        drawOutlinedText(fontNormal, "TAMANHO DA COBRA: " + size, 230, 270);
+        // Estatísticas (separadas por player para deixar claro quem fez quantos pontos)
+        drawOutlinedText(fontNormal, "PLAYER 1: " + p1Score + " PONTOS (TAMANHO " + p1Size + ")", 230, 320);
+        drawOutlinedText(fontNormal, "PLAYER 2: " + p2Score + " PONTOS (TAMANHO " + p2Size + ")", 230, 270);
 
         // Instrução para voltar
         drawOutlinedText(fontNormal, "> Pressione [ENTER] para Voltar", 180, 150);
