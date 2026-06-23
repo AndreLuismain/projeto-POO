@@ -12,6 +12,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+/**
+ * Tela de Fim de Jogo.
+ * OOP:
+ * - Herança: Herda de ScreenAdapter para ser gerenciada pelo ciclo de vida de telas da libGDX (Polimorfismo).
+ * - Encapsulamento: Mantém variáveis de estado (pontuações, texturas) como privativas, blindando sua exibição.
+ * - Princípio de Responsabilidade Única (SRP): Isola totalmente as lógicas gráficas de término do jogo (da simulação passível de colisão gerenciada pela GameScreen).
+ */
 public class GameOverScreen extends ScreenAdapter {
     private final SnakeGame game;
     private OrthographicCamera camera;
@@ -39,6 +46,10 @@ public class GameOverScreen extends ScreenAdapter {
         this.p2Score = p2Score;
         this.p2Size = p2Size;
 
+        // Acesso Estratégico em "I/O" Parado: 
+        // O salvamento chamando HighScoreManager ocorre no construtor para que o 
+        // acesso ao disco local (operação lenta) aconteça de forma síncrona uma única vez, 
+        // fora do método "render", tirando travamentos da engine no loop de Gameplay (GameScreen).
         // Salva a melhor pontuação da partida no arquivo local (Top 5).
         // Não usa a pontuação de quem "venceu" porque quem morre primeiro
         // pode ter feito mais pontos que o sobrevivente.
@@ -70,6 +81,9 @@ public class GameOverScreen extends ScreenAdapter {
         pixmap.dispose();
     }
 
+    // Polimorfismo e Loop Dinâmico: O framework libGDX agora direciona seu loop 
+    // principal (60x/seg) para este método, monitorando eventos visuais estáticos e 
+    // lendo inputs isolados das regras de negócio do jogo (SnakeGame/GameScreen).
     @Override
     public void render(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -135,6 +149,9 @@ public class GameOverScreen extends ScreenAdapter {
         viewport.update(width, height, true);
     }
 
+    // Encerramento do ciclo e controle de hardware: 
+    // Libera os recursos pesados estáticos de RAM e VRAM da classe
+    // para evitar memory-leaks ao destruir essa transição.
     @Override
     public void dispose() {
         fontTitle.dispose();

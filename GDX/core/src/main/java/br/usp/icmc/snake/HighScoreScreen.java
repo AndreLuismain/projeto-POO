@@ -13,6 +13,13 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.List;
 
+/**
+ * Tela de Exibição dos Melhores Pontos (Top 5).
+ * OOP:
+ * - Herança e Polimorfismo: Herda de ScreenAdapter, aproveitando a estrutura da libGDX para gerenciamento de telas.
+ * - Encapsulamento: Mantém as listas de pontuações e elementos gráficos em estado seguro e private.
+ * - Princípio de Responsabilidade Única (SRP): Focada unicamente na apresentação visual dos dados persistidos.
+ */
 public class HighScoreScreen extends ScreenAdapter {
     private final SnakeGame game;
     private OrthographicCamera camera;
@@ -55,10 +62,16 @@ public class HighScoreScreen extends ScreenAdapter {
         this.overlayTexture = new Texture(pixmap);
         pixmap.dispose();
 
+        // Acesso Estratégico em "I/O" Parado:
+        // A leitura do arquivo físico ocorre uma única vez de forma síncrona na instanciação.
+        // Evitando que o custoso acesso ao disco aconteça repetidamente no loop de frame-rate (render).
         // 3. Carrega os dados persistidos do Top 5
         this.topScores = HighScoreManager.loadScores();
     }
 
+    // Polimorfismo e Loop Dinâmico: A engine assume este "render" como loop principal.
+    // Lida quase inteiramente com operações gráficas isoladas e inputs básicos, 
+    // liberando a engine de preocupações com as mecânicas de física do jogo de fato.
     @Override
     public void render(float delta) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
@@ -130,6 +143,9 @@ public class HighScoreScreen extends ScreenAdapter {
         viewport.update(width, height, true);
     }
 
+    // Encerramento do ciclo e liberação de VRAM:
+    // Destrói ativamente as texturas para liberar a memória da placa de vídeo (GPU)
+    // ao trocar esta tela, mantendo a performance do jogo ideal ao longo do tempo.
     @Override
     public void dispose() {
         fontTitle.dispose();
