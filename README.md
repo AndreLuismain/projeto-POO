@@ -5,10 +5,19 @@ Um clone moderno e expandido do clássico jogo da cobrinha (Snake), construído 
 Desenvolvido em **Java 21** e **LibGDX** como projeto prático para a disciplina de Programação Orientada a Objetos (SCC504) do Instituto de Ciências Matemáticas e de Computação (ICMC-USP).
 
 ## Tecnologias Utilizadas
-* **Linguagem:** Java 21
+* **Linguagem:** Java 21 LTS
 * **Framework Gráfico:** LibGDX (Desktop/LWJGL3)
-* **Build System:** Gradle
-* **Arquitetura:** Design Patterns aplicados à Game Loop, separação estrita de regras de negócio (GameWorld/Snake) e apresentação (Screens).
+* **Build System & Testes:** Gradle Wrapper + JUnit 5
+* **Arquitetura:** Design Patterns aplicados à Game Loop, separação estrita de regras de negócio (`GameWorld`/`Snake`) e apresentação (`Screens`).
+
+## 🧭 Índice de Navegação do Repositório
+
+| Diretório / Módulo | Stack / Tecnologia | Resumo Técnico e Conceitos Aplicados |
+|---|---|---|
+| **[`GDX/`](./GDX/)** | Gradle Multi-Module, Java 21 | Raiz do projeto Gradle contendo a configuração de build, wrapper (`gradlew`) e módulos da aplicação. |
+| **[`GDX/core/`](./GDX/core/)** | Java 21, LibGDX Core, JUnit 5 | Núcleo de domínio desacoplado (`GameWorld`, `Snake` com `Deque` $O(1)$, `GridPosition` Record, `Direction` Enum, `HighScoreManager` I/O), telas (`Screen`) e testes unitários (`SnakeTest`, `GameWorldTest`, `HighScoreManagerTest`). |
+| **[`GDX/lwjgl3/`](./GDX/lwjgl3/)** | LWJGL3, OpenGL Desktop | Launcher Desktop multiplataforma (`Lwjgl3Launcher`) e configuração de empacotamento. |
+| **[`Executavel/`](./Executavel/)** | Windows Portable Runtime | Build empacotada com runtime Java embutido para execução direta em ambiente Windows. |
 
 ## Funcionalidades e Mecânicas
 

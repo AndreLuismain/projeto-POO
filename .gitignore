@@ -1,7 +1,23 @@
-# OS
+# Gradle & Build Artifacts
+.gradle/
+**/build/
+**/out/
+**/target/
+*.class
+
+# IDEs & Editors
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+**/.vscode/
+.settings/
+.classpath
+.project
+
+# OS Specific
 .DS_Store
 Thumbs.db
-
-# VS Code (mantém settings.json compartilhado, ignora o resto)
-.vscode/*
-!.vscode/settings.json
+desktop.ini
