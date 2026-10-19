@@ -1,4 +1,4 @@
-# 🐍 Jogo da Cobrinha Pixelado (Snake Game)
+# Jogo da Cobrinha Pixelado (Snake Game)
 
 Um clone moderno e expandido do clássico jogo da cobrinha (Snake), construído do zero com foco em arquitetura Orientada a Objetos, separação de responsabilidades (Backend/Frontend) e persistência de dados local.
 
@@ -10,7 +10,7 @@ Desenvolvido em **Java 21** e **LibGDX** como projeto prático para a disciplina
 * **Build System & Testes:** Gradle Wrapper + JUnit 5
 * **Arquitetura:** Design Patterns aplicados à Game Loop, separação estrita de regras de negócio (`GameWorld`/`Snake`) e apresentação (`Screens`).
 
-## 🧭 Índice de Navegação do Repositório
+## Índice de Navegação do Repositório
 
 | Diretório / Módulo | Stack / Tecnologia | Resumo Técnico e Conceitos Aplicados |
 |---|---|---|
@@ -31,9 +31,9 @@ Desenvolvido em **Java 21** e **LibGDX** como projeto prático para a disciplina
 * **Resolução Dinâmica:** O jogador pode escolher o tamanho da grade (Pequeno, Normal, Épico) e a velocidade inicial diretamente pelo Menu Principal.
 
 ### Itens Especiais (Power-ups)
-* 🍎 **Comida Normal:** Cresce a cobra e aumenta ligeiramente a velocidade geral do jogo.
-* ⭐ **Estrela (Multiplicador):** Multiplica a pontuação ganha por 3 temporariamente.
-* 🛡️ **Escudo (Invulnerabilidade):** Concede o efeito fantasma (alpha visual e invulnerabilidade), permitindo atravessar a outra cobra, obstáculos e o próprio corpo por um curto período.
+* **Comida Normal:** Cresce a cobra e aumenta ligeiramente a velocidade geral do jogo.
+* **Estrela (Multiplicador):** Multiplica a pontuação ganha por 3 temporariamente.
+* **Escudo (Invulnerabilidade):** Concede o efeito fantasma (alpha visual e invulnerabilidade), permitindo atravessar a outra cobra, obstáculos e o próprio corpo por um curto período.
 
 ### UI & Persistência de Dados
 * **I/O de Arquivos:** Sistema de High Scores isolado (`HighScoreManager`) que lê e grava os 5 melhores pontuadores em um arquivo `.txt` local.
